@@ -1,0 +1,38 @@
+# Intellij
+.idea/
+*.iml
+*.iws
+*.ipr
+.slcache/
+projectFilesBackup1/
+
+# web application files
+/web-app/WEB-INF/classes
+
+# "temporary" build files
+/target
+/target-eclipse
+/target-eclipse/classes
+
+#oh, all classes should gtfo
+*.class
+
+# logs
+/stacktrace.log
+/test/reports
+
+# temporary files
+*~
+*.orig
+
+#GGTS specific files
+.classpath
+.project
+.settings/
+
+#war generated files
+*.war
+
+/test/unit
+
+restapidoc.json
