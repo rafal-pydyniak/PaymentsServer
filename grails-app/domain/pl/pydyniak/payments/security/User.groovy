@@ -19,6 +19,8 @@ class User {
 	}
 
 	static mapping = {
+		//Postgres fails if grails tries to create user table
+		table 'myUser'
 		password column: '`password`'
 	}
 
