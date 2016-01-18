@@ -14,9 +14,24 @@
       <column name="token" sqlType="VARCHAR" precision="255" scale="0" nullable="false" jdbcType="12"/>
       <column name="user_id" sqlType="BIGINT" precision="19" scale="0" nullable="false" jdbcType="-5"/>
       <primary-key name="PRIMARY" columns="id"/>
-      <foreign-key name="FK_3rtt9efhavjo2dfx9f763sypm" columns="user_id" ref-table="user" ref-schema="" ref-catalog="payments" ref-columns="id" update-rule="3" delete-rule="3" deferrability="2"/>
+      <foreign-key name="FK_3rtt9efhavjo2dfx9f763sypm" columns="user_id" ref-table="myUser" ref-schema="" ref-catalog="payments" ref-columns="id" update-rule="3" delete-rule="3" deferrability="2"/>
       <index name="UK_54wolcn5ryqshiq8gq0epvr3v" unique="true" columns="token"/>
       <index name="FK_3rtt9efhavjo2dfx9f763sypm" unique="false" columns="user_id"/>
+    </table>
+    <table name="myUser" schema="" catalog="payments" type="TABLE">
+      <column name="id" sqlType="BIGINT" precision="19" scale="0" nullable="false" jdbcType="-5" autoIncrement="true"/>
+      <column name="version" sqlType="BIGINT" precision="19" scale="0" nullable="false" jdbcType="-5"/>
+      <column name="account_expired" sqlType="BIT" precision="1" scale="0" nullable="false" jdbcType="-7"/>
+      <column name="account_locked" sqlType="BIT" precision="1" scale="0" nullable="false" jdbcType="-7"/>
+      <column name="enabled" sqlType="BIT" precision="1" scale="0" nullable="false" jdbcType="-7"/>
+      <column name="password" sqlType="VARCHAR" precision="255" scale="0" nullable="false" jdbcType="12"/>
+      <column name="password_expired" sqlType="BIT" precision="1" scale="0" nullable="false" jdbcType="-7"/>
+      <column name="username" sqlType="VARCHAR" precision="255" scale="0" nullable="false" jdbcType="12"/>
+      <primary-key name="PRIMARY" columns="id"/>
+      <exported-key name="FK_3rtt9efhavjo2dfx9f763sypm" table="confirmation_token" schema="" catalog="payments" columns="user_id"/>
+      <exported-key name="FK_4fmjedju7b35tb5cr71n3ntb0" table="task" schema="" catalog="payments" columns="user_id"/>
+      <exported-key name="FK_apcc8lxk2xnug8377fatvbn04" table="user_role" schema="" catalog="payments" columns="user_id"/>
+      <index name="UK_evrd63o98460i12ttsq2lefr1" unique="true" columns="username"/>
     </table>
     <table name="role" schema="" catalog="payments" type="TABLE">
       <column name="id" sqlType="BIGINT" precision="19" scale="0" nullable="false" jdbcType="-5" autoIncrement="true"/>
@@ -37,30 +52,16 @@
       <column name="priority" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4"/>
       <column name="realisation_date" sqlType="DATETIME" precision="19" scale="0" nullable="true" jdbcType="93"/>
       <column name="user_id" sqlType="BIGINT" precision="19" scale="0" nullable="false" jdbcType="-5"/>
+      <column name="timestamp" sqlType="BIGINT" precision="19" scale="0" nullable="false" jdbcType="-5"/>
       <primary-key name="PRIMARY" columns="id"/>
-      <foreign-key name="FK_4fmjedju7b35tb5cr71n3ntb0" columns="user_id" ref-table="user" ref-schema="" ref-catalog="payments" ref-columns="id" update-rule="3" delete-rule="3" deferrability="2"/>
+      <foreign-key name="FK_4fmjedju7b35tb5cr71n3ntb0" columns="user_id" ref-table="myUser" ref-schema="" ref-catalog="payments" ref-columns="id" update-rule="3" delete-rule="3" deferrability="2"/>
       <index name="FK_4fmjedju7b35tb5cr71n3ntb0" unique="false" columns="user_id"/>
-    </table>
-    <table name="user" schema="" catalog="payments" type="TABLE">
-      <column name="id" sqlType="BIGINT" precision="19" scale="0" nullable="false" jdbcType="-5" autoIncrement="true"/>
-      <column name="version" sqlType="BIGINT" precision="19" scale="0" nullable="false" jdbcType="-5"/>
-      <column name="account_expired" sqlType="BIT" precision="1" scale="0" nullable="false" jdbcType="-7"/>
-      <column name="account_locked" sqlType="BIT" precision="1" scale="0" nullable="false" jdbcType="-7"/>
-      <column name="enabled" sqlType="BIT" precision="1" scale="0" nullable="false" jdbcType="-7"/>
-      <column name="password" sqlType="VARCHAR" precision="255" scale="0" nullable="false" jdbcType="12"/>
-      <column name="password_expired" sqlType="BIT" precision="1" scale="0" nullable="false" jdbcType="-7"/>
-      <column name="username" sqlType="VARCHAR" precision="255" scale="0" nullable="false" jdbcType="12"/>
-      <primary-key name="PRIMARY" columns="id"/>
-      <exported-key name="FK_3rtt9efhavjo2dfx9f763sypm" table="confirmation_token" schema="" catalog="payments" columns="user_id"/>
-      <exported-key name="FK_4fmjedju7b35tb5cr71n3ntb0" table="task" schema="" catalog="payments" columns="user_id"/>
-      <exported-key name="FK_apcc8lxk2xnug8377fatvbn04" table="user_role" schema="" catalog="payments" columns="user_id"/>
-      <index name="UK_sb8bbouer5wak8vyiiy4pf2bx" unique="true" columns="username"/>
     </table>
     <table name="user_role" schema="" catalog="payments" type="TABLE">
       <column name="role_id" sqlType="BIGINT" precision="19" scale="0" nullable="false" jdbcType="-5"/>
       <column name="user_id" sqlType="BIGINT" precision="19" scale="0" nullable="false" jdbcType="-5"/>
       <primary-key name="PRIMARY" columns="role_id,user_id"/>
-      <foreign-key name="FK_apcc8lxk2xnug8377fatvbn04" columns="user_id" ref-table="user" ref-schema="" ref-catalog="payments" ref-columns="id" update-rule="3" delete-rule="3" deferrability="2"/>
+      <foreign-key name="FK_apcc8lxk2xnug8377fatvbn04" columns="user_id" ref-table="myUser" ref-schema="" ref-catalog="payments" ref-columns="id" update-rule="3" delete-rule="3" deferrability="2"/>
       <foreign-key name="FK_it77eq964jhfqtu54081ebtio" columns="role_id" ref-table="role" ref-schema="" ref-catalog="payments" ref-columns="id" update-rule="3" delete-rule="3" deferrability="2"/>
       <index name="FK_apcc8lxk2xnug8377fatvbn04" unique="false" columns="user_id"/>
     </table>

@@ -8,6 +8,7 @@ class Task {
 	Date realisationDate
 	Integer priority = 3 //1 -lowest, 5 - highest
 	Double amount
+	Long timestamp
 	
 	Boolean enabled=true
 	Boolean deleted=false

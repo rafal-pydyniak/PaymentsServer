@@ -45,6 +45,8 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://download.java.net/maven/2/"
         //mavenRepo "http://repository.jboss.com/maven2/"
         mavenRepo "http://repo.spring.io/milestone/"
+        mavenRepo 'http://dl.bintray.com/rahulsom/myjava'
+
     }
 
     dependencies {
@@ -53,6 +55,7 @@ grails.project.dependency.resolution = {
         runtime 'postgresql:postgresql:8.4-702.jdbc3'
         // runtime 'org.postgresql:postgresql:9.3-1101-jdbc41'
         test "org.grails:grails-datastore-test-support:1.0.2-grails-2.4"
+        compile "com.github.rahulsom:swaggydoc-commons:0.26.0" // this is only required for 0.24.0
     }
 
     plugins {
@@ -86,6 +89,10 @@ grails.project.dependency.resolution = {
 
         compile ":mail:1.0.7"
         compile ':quartz:1.0.2'
+
+        compile ":swaggydoc:0.26.0"
+
+
 
         // Uncomment these to enable additional asset-pipeline capabilities
         //compile ":sass-asset-pipeline:1.9.0"

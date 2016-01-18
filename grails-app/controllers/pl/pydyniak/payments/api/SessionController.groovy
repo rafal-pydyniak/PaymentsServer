@@ -1,5 +1,11 @@
 package pl.pydyniak.payments.api
 
+import com.wordnik.swagger.annotations.Api
+import com.wordnik.swagger.annotations.ApiImplicitParam
+import com.wordnik.swagger.annotations.ApiImplicitParams
+import com.wordnik.swagger.annotations.ApiOperation
+import com.wordnik.swagger.annotations.ApiResponse
+import com.wordnik.swagger.annotations.ApiResponses
 import grails.converters.JSON
 import grails.rest.RestfulController
 import grails.transaction.Transactional
@@ -12,14 +18,14 @@ import pl.pydyniak.payments.security.Role
 import pl.pydyniak.payments.security.User
 import pl.pydyniak.payments.security.UserRole
 
-@RestApi(name = "Session resource", description = "Methods for managing user session")
+@Api(value = "Methods for managing users", basePath = "/api/users", consumes = "application/json")
 class SessionController extends RestfulController {
     def springSecurityService
     def mailService
 
 
-    static allowedMethods = [register: 'POST', edit: 'PUT', delete: 'DELETE', blockUser: 'PUT', changePartnership: 'PUT',
-    authEmail: 'GET']
+        static allowedMethods = [register: 'POST', getUsers: 'GET', getUserById:'GET',
+                                 edit: 'PUT', delete: 'DELETE', deleteById: 'DELETE', authEmail: 'GET']
 
     String tokenCharset = (('A'..'Z') + ('0'..'9')).join()
     Integer tokenLength = 32
@@ -27,16 +33,14 @@ class SessionController extends RestfulController {
     static responseFormats = ['json']
 
 
-
-    def index() {
-        respond info: "Text"
-    }
-
-    @RestApiMethod(description = "Register new user, returns 201 if user has been created", verb = RestApiVerb.POST)
-    @RestApiErrors(apierrors = [
-            @RestApiError(code = "405", description = "Bad method, only POST method is allowed"),
-            @RestApiError(code = "400", description = "Bad JSON - not enough data or it's application/json is not set"),
-            @RestApiError(code = "409", description = "Conflict. User with this username already exists in database")
+    @ApiOperation(value = "Creating new user", httpMethod = "POST")
+    @ApiResponses([
+            @ApiResponse(code = 400, message = "Bad request json"),
+            @ApiResponse(code = 409, message = "Conflict. Username already exists in database")
+    ])
+    @ApiImplicitParams([
+            @ApiImplicitParam(name = 'body', paramType = 'body', required = true, dataType = "String",
+            defaultValue = "{'username': '', 'password':''}")
     ])
     @Transactional
     def register(User user) {
@@ -65,8 +69,6 @@ class SessionController extends RestfulController {
             return
         }
 
-
-
         String randomToken = RandomStringUtils.random(tokenLength, tokenCharset.toCharArray())
         if (ConfirmationToken.findByToken(randomToken) != null) {
             while (ConfirmationToken.findByToken(randomToken) != null) {
@@ -84,26 +86,49 @@ class SessionController extends RestfulController {
                 user: user
         ).save(flush: true, failOnError: true)
 
-        sendConfirmationEmail(user, randomToken)
+//        sendConfirmationEmail(user, randomToken)
+        user.enabled = true
+        user.save(flush:true)
         render(status: 201)
         return
 
     }
 
-    @RestApiMethod(description = "Edit user account informations", verb = RestApiVerb.PUT)
-    @RestApiErrors(apierrors = [
-            @RestApiError(code = "405", description = "Bad method, only POST method is allowed"),
-            @RestApiError(code = "401", description = "Unauthorized. User is not logged in"),
-            @RestApiError(code = "400", description = "Bad request. Request json is empty")
+    @ApiOperation(value = "Returns list of all users", httpMethod = "GET")
+    def getUsers() {
+        render User.findAll() as JSON
+    }
+
+    @ApiOperation(value = "Returns user info by id", httpMethod = "GET")
+    @ApiResponses([
+            @ApiResponse(code = 204, message = "No user with such id")
     ])
-    @Transactional
-    def edit() {
-        if (!springSecurityService.isLoggedIn()) {
-            render(status: 401)
+    @ApiImplicitParams([
+            @ApiImplicitParam(name = 'id', paramType = 'path', required = true, dataType = "Integer")
+            ])
+    def getUserById(int id) {
+        User user = User.findById(id)
+
+        if (user == null || !user.enabled) {
+            response.status = 204
+            render ([Error:"No such user"] as JSON)
             return
         }
 
+        render user as JSON
+    }
 
+    @ApiOperation(value = "Edits currently logged user informations", httpMethod = "PUT")
+    @ApiResponses([
+            @ApiResponse(code = 400, message = "Bad request json"),
+            @ApiResponse(code = 401, message = "Unauthorized")
+    ])
+    @ApiImplicitParams([
+            @ApiImplicitParam(name = 'body', paramType = 'body', required = true, dataType = "String",
+            defaultValue = "{\"password\":\"\"")
+    ])
+    @Transactional
+    def edit() {
         User currentUser = springSecurityService.currentUser
 
         def json = request.JSON
@@ -123,7 +148,7 @@ class SessionController extends RestfulController {
         return
     }
 
-    def sendConfirmationEmail(User user, String token) {
+    private def sendConfirmationEmail(User user, String token) {
         def serverUrl = grailsApplication.config.serverURL
         def authenticateResourceUrl = "api/session/auth/"
         def emailBody = "Go to the site to authenticate your account " + serverUrl + authenticateResourceUrl
@@ -140,10 +165,11 @@ class SessionController extends RestfulController {
         println "Confirmation email sent"
     }
 
-    @RestApiMethod(description = "Verificate email", verb = RestApiVerb.GET)
-    @RestApiParams(params = [
-            @RestApiParam(name = "Token", type = "String", paramType = RestApiParamType.PATH,
-                    description = "Verification token that is sent by email")
+
+    @ApiOperation(notes = '/api/users/auth/$token', value = "Method to verificate email", httpMethod = "GET")
+    @ApiImplicitParams([
+            @ApiImplicitParam(name = 'token', value = "Token that is sent on user's email",
+                    paramType = 'path', required = true, dataType = "String")
     ])
     @Transactional
     def authEmail(String token) {
@@ -169,51 +195,40 @@ class SessionController extends RestfulController {
         return
     }
 
-
-    @RestApiMethod(description = "Delete account (can be done by any user or by administrator to delete someone's account", verb = RestApiVerb.DELETE)
-    @RestApiParams(params = [
-            @RestApiParam(name = "id", type = "long", paramType = RestApiParamType.PATH,
-                    description = "Id of user to delete. If it's 0 then currently logged user will be deleted.")
+    @ApiOperation(notes = '/api/users', value = "Deletes currently logged user", httpMethod = "DELETE")
+    @ApiResponses([
+            @ApiResponse(code = 401, message = "Unauthorized")
     ])
-    @RestApiErrors(apierrors = [
-            @RestApiError(code = "405", description = "Bad method, only DELETE method is allowed"),
-            @RestApiError(code = "204", description = "User was not found")
+    def delete() {
+        User user = springSecurityService.getCurrentUser()
+        deleteUser(user)
+    }
+
+    private void deleteUser(User user) {
+        user.enabled = false
+        user.accountLocked = true
+        user.save(flush:true)
+    }
+
+    @ApiOperation(notes = '/api/users', value = "Deletes account by id. Only for administrator", httpMethod = "DELETE")
+    @ApiResponses([
+            @ApiResponse(code = 401, message = "Unauthorized. Method only for administrator"),
+            @ApiResponse(code = 204, message = "User not found")
+    ])
+    @ApiImplicitParams([
+            @ApiImplicitParam(name = 'id', paramType = 'path', required = true, dataType = "integer",
+            value = "Id of user to delete")
     ])
     @Transactional
-    def delete(int id) {
-        if (springSecurityService.isLoggedIn()) {
-            User currentUser = springSecurityService.getCurrentUser()
+    def deleteById(int id) {
+        User user = User.findById(id)
 
-            def userRole = UserRole.findByUser(currentUser)
-            if (id > 0) {
-                if (userRole.role.authority == "ROLE_ADMIN") {
-
-                    def userToDelete = User.findById(id)
-                    if (userToDelete == null) {
-                        render(status: 204)
-                        return
-                    }
-
-                    userToDelete.accountLocked = true
-                    userToDelete.save(flush: true, failOnError: true)
-
-                    respond status: "User has been deleted"
-                    return
-                } else {
-                    respond status: "Only administrator can delete other user!"
-                    return
-                }
-            }
-
-            if (id == 0) {
-                currentUser.deleted = true
-                respond status: "User deleted"
-                return
-            }
-
-            //			if (currentUser.au)
+        if (user == null) {
+            response.status = 204
+            render([Error:"No such user"] as JSON)
+            return
         }
-        respond status: "You need to be logged in to access this page"
-        return
+
+        deleteUser(user)
     }
 }

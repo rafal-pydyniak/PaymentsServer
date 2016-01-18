@@ -157,13 +157,11 @@ grails.plugin.springsecurity.interceptUrlMap = [
     '/api/login':                       ['permitAll'],
     '/api/logut':                       ['permitAll'],
     '/api/validate':                    ['permitAll'],
-    '/api/testUserAccess':              ['ROLE_USER'],
-    '/api/session/register':            ['permitAll'],
-    '/api/session/block/*' :	['ROLE_ADMIN'],
-    '/api/session/auth/*' :	['permitAll'],
-    //General rule - everything that is above has bigger priority
-    //Which means if something should be avaliable only for administrator then it should be written above this line
-    '/api/**':                          ['ROLE_ADMIN', "ROLE_USER"]
+    '/api/users':               ["request.getMethod().equals('POST') || request.getMethod().equals('GET') ||" +
+                                         " hasRole('ROLE_ADMIN') || hasRole('ROLE_USER')"],
+    '/api/users/*':             ["request.getMethod().equals('GET') || hasRole('ROLE_ADMIN')"],
+    '/api/tasks/**':                    ['ROLE_ADMIN', 'ROLE_USER'],
+    '/api/**':                          ['permitAll']
 ]
 
 grails.plugin.springsecurity.filterChain.chainMap = [

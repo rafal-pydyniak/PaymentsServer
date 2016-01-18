@@ -1,5 +1,7 @@
 package pl.pydyniak.payments
 
+import pl.pydyniak.payments.security.User
+
 import java.util.Date;
 
 import grails.converters.JSON;
@@ -19,6 +21,12 @@ class MarshallersService {
                     priority       : task.priority,
                     deleted        : task.deleted,
                     enabled        : task.enabled
+            ]
+        }
+        JSON.registerObjectMarshaller(User) { User user ->
+            return [
+                    id              : user.id,
+                    username        : user.username,
             ]
         }
     }

@@ -10,11 +10,15 @@ class UrlMappings {
         "/"(view:"/index")
         "500"(view:'/error')
 
-        "/api/session/register"(controller: 'Session', action: 'register')
-        "/api/session/edit"(controller: 'Session', action: 'edit')
-        "/api/session/delete/$id"(controller:'Session', action:"delete")
-        "/api/session/auth/$token"(controller: 'Session', action:'authEmail')
-        "/api/session/block/$id"(controller:'Session', action: 'blockUser')
+        //Users
+        "/api/users"(controller: 'Session') {
+            action = [GET: 'getUsers', POST: 'register', PUT: 'EDIT', DELETE:'delete']
+        }
+
+        "/api/users/$id"(controller: 'Session') {
+            action = [DELETE: 'deleteById', GET: 'getById']
+        }
+        "/api/users/auth/$token"(controller: 'Session', action:'authEmail')
 
         //Tasks
         "/api/tasks"(controller: 'Task') {
