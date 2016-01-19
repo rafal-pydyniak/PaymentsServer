@@ -90,7 +90,7 @@ grails.project.dependency.resolution = {
         compile ":mail:1.0.7"
         compile ':quartz:1.0.2'
 
-        compile ":swaggydoc:0.26.0"
+//        compile ":swaggydoc:0.26.0"
 
 
 
