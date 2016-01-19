@@ -1,11 +1,7 @@
 package pl.pydyniak.payments.api
 
-import com.wordnik.swagger.annotations.Api
-import com.wordnik.swagger.annotations.ApiImplicitParam
-import com.wordnik.swagger.annotations.ApiImplicitParams
-import com.wordnik.swagger.annotations.ApiOperation
-import com.wordnik.swagger.annotations.ApiResponse
-import com.wordnik.swagger.annotations.ApiResponses
+
+import com.wordnik.swagger.annotations.*
 import grails.converters.JSON
 import grails.rest.RestfulController
 import grails.transaction.Transactional
@@ -18,8 +14,11 @@ import pl.pydyniak.payments.security.Role
 import pl.pydyniak.payments.security.User
 import pl.pydyniak.payments.security.UserRole
 
-@Api(value = "Methods for managing users", basePath = "/api/users", consumes = "application/json")
-class SessionController extends RestfulController {
+import javax.mail.internet.AddressException
+import javax.mail.internet.InternetAddress
+
+@Api("Methods for managing users")
+class UsersController extends RestfulController {
     def springSecurityService
     def mailService
 
@@ -53,14 +52,21 @@ class SessionController extends RestfulController {
             render([Error: "Username can't be null!"] as JSON)
             return
         }
-        if (user.password == null) {
+
+        if (!isValidEmailAddress(user.username)) {
             response.status = 400
-            render([Error: "Password can't be null!"] as JSON)
+            render([Error: "Username should be an e-mail address"] as JSON)
             return
         }
 
         if (User.findByUsername(user.username) != null) {
             render(status: 409)
+            return
+        }
+
+        if (user.password == null) {
+            response.status = 400
+            render([Error: "Password can't be null!"] as JSON)
             return
         }
 
@@ -94,14 +100,21 @@ class SessionController extends RestfulController {
 
     }
 
+    public boolean isValidEmailAddress(String email) {
+        def regexStr = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}\u0024/
+        return email.matches(regexStr)
+    }
+
     @ApiOperation(value = "Returns list of all users", httpMethod = "GET")
     def getUsers() {
-        render User.findAll() as JSON
+        render User.findAll().findAll { user ->
+            user.enabled == true
+        } as JSON
     }
 
     @ApiOperation(value = "Returns user info by id", httpMethod = "GET")
     @ApiResponses([
-            @ApiResponse(code = 204, message = "No user with such id")
+            @ApiResponse(code = 404, message = "No user with such id")
     ])
     @ApiImplicitParams([
             @ApiImplicitParam(name = 'id', paramType = 'path', required = true, dataType = "Integer")
@@ -110,7 +123,7 @@ class SessionController extends RestfulController {
         User user = User.findById(id)
 
         if (user == null || !user.enabled) {
-            response.status = 204
+            response.status = 404
             render ([Error:"No such user"] as JSON)
             return
         }
@@ -202,6 +215,9 @@ class SessionController extends RestfulController {
     def delete() {
         User user = springSecurityService.getCurrentUser()
         deleteUser(user)
+
+        response.status = 204
+        return
     }
 
     private void deleteUser(User user) {
@@ -213,7 +229,7 @@ class SessionController extends RestfulController {
     @ApiOperation(notes = '/api/users', value = "Deletes account by id. Only for administrator", httpMethod = "DELETE")
     @ApiResponses([
             @ApiResponse(code = 401, message = "Unauthorized. Method only for administrator"),
-            @ApiResponse(code = 204, message = "User not found")
+            @ApiResponse(code = 404, message = "User not found")
     ])
     @ApiImplicitParams([
             @ApiImplicitParam(name = 'id', paramType = 'path', required = true, dataType = "integer",
@@ -224,11 +240,13 @@ class SessionController extends RestfulController {
         User user = User.findById(id)
 
         if (user == null) {
-            response.status = 204
+            response.status = 404
             render([Error:"No such user"] as JSON)
             return
         }
 
         deleteUser(user)
+        response.status = 204
+        return
     }
 }

@@ -16,16 +16,15 @@ import java.util.Date;
 
 import grails.rest.RestfulController;
 
-@Api(value = "Tasks management methods", basePath = "/api/tasks")
-class TaskController extends RestfulController {
+@Api(value = "Tasks management methods", basePath = "Payments/api/tasks")
+class TasksController extends RestfulController {
     def springSecurityService
     static allowedMethods = [addTask: 'POST', getTasks: 'GET', getTaskById: 'GET', editTask: 'PUT', deleteTask: 'DELETE']
 
-    @ApiOperation(value = "Creating new task", httpMethod = "POST")
+    @ApiOperation(value = "", httpMethod = "POST")
     @ApiResponses([
             @ApiResponse(code = 400, message = "Bad request json"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 409, message = "Conflict. Username already exists in database")
+            @ApiResponse(code = 401, message = "Unauthorized")
     ])
     @ApiImplicitParams([
             @ApiImplicitParam(name = 'body', paramType = 'body', required = true, dataType = "String",
@@ -51,7 +50,8 @@ class TaskController extends RestfulController {
             task.description = json.description
         }
         if (json.realisationDate != null) {
-            task.realisationDate = tryToParseDateOrReturnTodays(json.realisationDate)
+            task.realisationDate = tryToParseDate(json.realisationDate)
+            if (task.realisationDate == null) return
         }
         if (json.amount != null) {
             task.amount = json.amount
@@ -69,11 +69,36 @@ class TaskController extends RestfulController {
         return
     }
 
-    private Date tryToParseDateOrReturnTodays(String date) {
+//    private tryToParseAmount(String amount) {
+//        try {
+//            double am = Double.parseDouble(amount)
+//            return am
+//        } catch (Exception e) {
+//            response.status = 400
+//            render([Error:"Wrong amount number"] as JSON)
+//            return
+//        }
+//    }
+//
+//    private tryToParsePriority(String amount) {
+//        try {
+//            int priority = Integer.parseInt(amount)
+//            if (priority>5 || priority < 1) throw new Exception()
+//            return priority
+//        } catch (Exception e) {
+//            response.status = 400
+//            render ([Error:"Wrong priority. Should be an integer from 1 to 5"] as JSON)
+//            return
+//        }
+//    }
+
+    private Date tryToParseDate(String date) {
         try {
             parseDate(date)
         } catch (ParseException) {
-            return new Date()
+            response.status = 400
+            render ([Error:"Wrong date format - should be dd-MM-yyyy"] as JSON)
+            return null
         }
     }
 
@@ -83,22 +108,35 @@ class TaskController extends RestfulController {
 
     @ApiOperation(value = "Returns list of all tasks of currently logged user", httpMethod = "GET")
     @ApiResponses([
-            @ApiResponse(code = 405, message = "Bad method. Only GET is allowed")
+            @ApiResponse(code = 401, message = "Unauthorized")
     ])
+//    @ApiImplicitParams([
+//            @ApiImplicitParam()
+//    ])
     def getTasks() {
         User user = springSecurityService.getCurrentUser()
 
-        def tasks = Task.where {
-            it.user.username == user.username
+        def tasks = Task.findAll().findAll() { Task task ->
+            task.user.username == user.username && task.deleted == false
+        }
+//        def tasksList
+        if (params.orderBy != null && params.orderBy == "amount" || params.orderBy == "realisationDate") {
+            if (params.orderBy=="amount") {
+                tasks.sort { it.amount}
+            }
+            else if (params.orderBy == "realisationDate") {
+                tasks.sort {it.realisationDate}
+            }
+        } else {
+//            tasksList = tasks.list()
         }
 
-        def tasksList = tasks.list()
-        render tasksList as JSON
+        render tasks as JSON
     }
 
     @ApiOperation(value = "Returns task info by id", httpMethod = "GET")
     @ApiResponses([
-            @ApiResponse(code = 204, message = "No task with such id"),
+            @ApiResponse(code = 404, message = "No task with such id"),
             @ApiResponse(code = 401, message = "Unauthorized. User can only see his tasks")
     ])
     @ApiImplicitParams([
@@ -109,8 +147,8 @@ class TaskController extends RestfulController {
 
         def task = Task.findById(id)
 
-        if (task == null) {
-            render(status: 204)
+        if (task == null || task.deleted == true) {
+            render(status: 404)
             return
         }
 
@@ -137,7 +175,7 @@ class TaskController extends RestfulController {
 
         Task task = Task.findById(id)
 
-        if (task == null) {
+        if (task == null || task.deleted == true) {
             render(status: 404)
             return
         }
@@ -164,7 +202,7 @@ class TaskController extends RestfulController {
         }
 
         if (json.realisationDate!=null) {
-            task.realisationDate = tryToParseDateOrReturnTodays(json.realisationDate)
+            task.realisationDate = tryToParseDate(json.realisationDate)
         }
 
         if (json.amount!=null) {
@@ -175,7 +213,7 @@ class TaskController extends RestfulController {
             task.priority = json.priority
         }
         task.save(flush: true, failOnError: true)
-        render(status: 200) // TODO check status
+        render(status: 200)
         return
     }
 
@@ -192,7 +230,7 @@ class TaskController extends RestfulController {
         User user = springSecurityService.getCurrentUser()
         Task task = Task.findById(id)
 
-        if (task == null) {
+        if (task == null || task.deleted == true) {
             render(status: 404)
             return
         }
@@ -209,7 +247,7 @@ class TaskController extends RestfulController {
         task.save(flush: true, failOnError: true)
 
 
-        render(status: 200)
+        render(status: 204)
         return
     }
 
