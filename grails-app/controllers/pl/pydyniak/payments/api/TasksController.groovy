@@ -110,9 +110,10 @@ class TasksController extends RestfulController {
     @ApiResponses([
             @ApiResponse(code = 401, message = "Unauthorized")
     ])
-//    @ApiImplicitParams([
-//            @ApiImplicitParam()
-//    ])
+    @ApiImplicitParams([
+            @ApiImplicitParam(name = 'orderBy', value = "Orders tasks. Possible values are amount or realisationDate",
+            paramType = 'query', required = false, dataType = "String")
+    ])
     def getTasks() {
         User user = springSecurityService.getCurrentUser()
 
