@@ -59,10 +59,20 @@ class TasksController extends RestfulController {
         if (json.priority != null) {
             task.priority = json.priority
         }
+        if (json.deleted != null) {
+            task.deleted = json.deleted
+        }
+        if (json.timestamp != null) {
+            task.timestamp = json.timestamp
+        } else {
+            task.timestamp = new Date().getTime()
+        }
+        if (json.lastUpdated != null) {
+            task.lastUpdated = json.lastUpdated
+        } else {
+            task.lastUpdated = new Date().getTime()
+        }
 
-
-        task.timestamp = new Date().getTime()
-        task.lastUpdated = new Date().getTime()
         task.save(flush: true, failOnError: true)
 
         response.status = 201
@@ -214,8 +224,15 @@ class TasksController extends RestfulController {
         if (json.priority!=null) {
             task.priority = json.priority
         }
+        if (json.deleted != null) {
+            task.deleted = json.deleted
+        } 
+        if (json.lastUpdated != null) {
+            task.lastUpdated = json.lastUpdated
+        } else {
+            task.lastUpdated = new Date().getTime()
+        }
 
-        task.lastUpdated = new Date().getTime()
         task.save(flush: true, failOnError: true)
         render(status: 200)
         return
