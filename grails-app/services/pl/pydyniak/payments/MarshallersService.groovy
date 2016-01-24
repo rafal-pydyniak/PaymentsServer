@@ -13,12 +13,13 @@ class MarshallersService {
 
     def register() {
         JSON.registerObjectMarshaller(Task) { Task task ->
+            String d = task.realisationDate != null? new SimpleDateFormat("dd-MM-yyyy").format(task.realisationDate) : null
             return [
                     id             : task.id,
                     name           : task.name,
                     description    : task.description,
                     amount         : task.amount,
-                    realisationDate: new SimpleDateFormat("dd-MM-yyyy").format(task.realisationDate),
+                    realisationDate: d,
                     priority       : task.priority,
                     deleted        : task.deleted,
                     enabled        : task.enabled,
