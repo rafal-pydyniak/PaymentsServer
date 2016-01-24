@@ -2,6 +2,7 @@ package pl.pydyniak.payments
 
 import pl.pydyniak.payments.security.User
 
+import java.text.SimpleDateFormat
 import java.util.Date;
 
 import grails.converters.JSON;
@@ -17,10 +18,12 @@ class MarshallersService {
                     name           : task.name,
                     description    : task.description,
                     amount         : task.amount,
-                    realisationDate: task.realisationDate,
+                    realisationDate: new SimpleDateFormat("dd-MM-yyyy").format(task.realisationDate),
                     priority       : task.priority,
                     deleted        : task.deleted,
-                    enabled        : task.enabled
+                    enabled        : task.enabled,
+                    timestamp      : task.timestamp,
+                    lastUpdated    : task.lastUpdated
             ]
         }
         JSON.registerObjectMarshaller(User) { User user ->

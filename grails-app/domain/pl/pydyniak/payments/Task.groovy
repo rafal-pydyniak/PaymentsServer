@@ -9,7 +9,8 @@ class Task {
 	Integer priority = 3 //1 -lowest, 5 - highest
 	Double amount
 	Long timestamp
-	
+	Long lastUpdated
+
 	Boolean enabled=true
 	Boolean deleted=false
 	
