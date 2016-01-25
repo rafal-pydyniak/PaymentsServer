@@ -53,6 +53,7 @@
       <column name="realisation_date" sqlType="DATETIME" precision="19" scale="0" nullable="true" jdbcType="93"/>
       <column name="user_id" sqlType="BIGINT" precision="19" scale="0" nullable="false" jdbcType="-5"/>
       <column name="timestamp" sqlType="BIGINT" precision="19" scale="0" nullable="false" jdbcType="-5"/>
+      <column name="last_updated" sqlType="BIGINT" precision="19" scale="0" nullable="false" jdbcType="-5"/>
       <primary-key name="PRIMARY" columns="id"/>
       <foreign-key name="FK_4fmjedju7b35tb5cr71n3ntb0" columns="user_id" ref-table="myUser" ref-schema="" ref-catalog="payments" ref-columns="id" update-rule="3" delete-rule="3" deferrability="2"/>
       <index name="FK_4fmjedju7b35tb5cr71n3ntb0" unique="false" columns="user_id"/>

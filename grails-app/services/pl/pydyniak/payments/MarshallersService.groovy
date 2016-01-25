@@ -23,8 +23,8 @@ class MarshallersService {
                     priority       : task.priority,
                     deleted        : task.deleted,
                     enabled        : task.enabled,
-                    timestamp      : task.timestamp,
-                    lastUpdated    : task.lastUpdated
+                    timestamp      : task.timestamp+3600,
+                    lastUpdated    : task.lastUpdated+3600
             ]
         }
         JSON.registerObjectMarshaller(User) { User user ->

@@ -226,7 +226,7 @@ class TasksController extends RestfulController {
         }
         if (json.deleted != null) {
             task.deleted = json.deleted
-        } 
+        }
         if (json.lastUpdated != null) {
             task.lastUpdated = json.lastUpdated
         } else {
