@@ -63,12 +63,12 @@ class TasksController extends RestfulController {
             task.deleted = json.deleted
         }
         if (json.timestamp != null) {
-            task.timestamp = Long.parse(json.timestamp)
+            task.timestamp = Long.parseLong(json.timestamp)
         } else {
             task.timestamp = new Date().getTime()
         }
         if (json.lastUpdated != null) {
-            task.lastUpdated = Long.parse(json.lastUpdated)
+            task.lastUpdated = Long.parseLong(json.lastUpdated)
         } else {
             task.lastUpdated = new Date().getTime()
         }
@@ -228,7 +228,7 @@ class TasksController extends RestfulController {
             task.deleted = json.deleted
         }
         if (json.lastUpdated != null) {
-            task.lastUpdated = json.lastUpdated
+            task.lastUpdated = Long.parseLong(json.lastUpdated)
         } else {
             task.lastUpdated = new Date().getTime()
         }
