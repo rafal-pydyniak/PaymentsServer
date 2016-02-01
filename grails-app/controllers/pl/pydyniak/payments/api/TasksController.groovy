@@ -63,12 +63,12 @@ class TasksController extends RestfulController {
             task.deleted = json.deleted
         }
         if (json.timestamp != null) {
-            task.timestamp = json.timestamp
+            task.timestamp = Long.parse(json.timestamp)
         } else {
             task.timestamp = new Date().getTime()
         }
         if (json.lastUpdated != null) {
-            task.lastUpdated = json.lastUpdated
+            task.lastUpdated = Long.parse(json.lastUpdated)
         } else {
             task.lastUpdated = new Date().getTime()
         }
