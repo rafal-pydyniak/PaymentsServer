@@ -73,35 +73,13 @@ class TasksController extends RestfulController {
             task.lastUpdated = new Date().getTime()
         }
 
+
         task.save(flush: true, failOnError: true)
 
         response.status = 201
         render([Status: "ok"] as JSON)
         return
     }
-
-//    private tryToParseAmount(String amount) {
-//        try {
-//            double am = Double.parseDouble(amount)
-//            return am
-//        } catch (Exception e) {
-//            response.status = 400
-//            render([Error:"Wrong amount number"] as JSON)
-//            return
-//        }
-//    }
-//
-//    private tryToParsePriority(String amount) {
-//        try {
-//            int priority = Integer.parseInt(amount)
-//            if (priority>5 || priority < 1) throw new Exception()
-//            return priority
-//        } catch (Exception e) {
-//            response.status = 400
-//            render ([Error:"Wrong priority. Should be an integer from 1 to 5"] as JSON)
-//            return
-//        }
-//    }
 
     private Date tryToParseDate(String date) {
         try {
